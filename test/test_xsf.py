@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy import pi, isnan
 
 from periodictable import formula
