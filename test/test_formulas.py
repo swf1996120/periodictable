@@ -2,9 +2,12 @@ from __future__ import division
 from copy import deepcopy
 from pickle import loads, dumps
 
+import pytest
+
 from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti, S
 from periodictable import formula, mix_by_weight, mix_by_volume
 from periodictable.formulas import count_elements, pretty
+from periodictable.formulas import _mix_by_weight_pairs, _mix_by_volume_pairs
 
 
 def test_mixtures_reject_negative_or_nonfinite_quantities():
@@ -23,6 +26,20 @@ def test_mixtures_reject_negative_or_nonfinite_quantities():
             pass
         else:
             raise AssertionError(f"invalid mixture quantities accepted: {items!r}")
+
+def test_mixture_pair_iterators():
+    water = formula("H2O", density=1.0)
+    heavy_water = formula("D2O", density=1.1)
+    pairs = [(water, 2.0), (heavy_water, 1.0), (water, 0.0)]
+    for mixer in (_mix_by_weight_pairs, _mix_by_volume_pairs):
+        expected = mixer(pairs)
+        actual = mixer(iter(pairs))
+        assert actual.atoms == expected.atoms
+        assert actual.density == expected.density
+        assert actual.mass > 0
+        for invalid in (-1.0, float("nan"), float("inf")):
+            with pytest.raises(ValueError, match="finite and non-negative"):
+                mixer(iter([(water, 1.0), (heavy_water, invalid)]))
 
 def check_parse_fails(s):
     try:

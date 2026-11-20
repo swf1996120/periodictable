@@ -94,10 +94,11 @@ def mix_by_weight(*args, **kw) -> "Formula":
 def _mix_by_weight_pairs(pairs: list[tuple["Formula", float]]) -> "Formula":
     from .formulas import Formula # For running as __main__
 
+    # Materialize iterators before validation so they can be reused below.
+    pairs = list(pairs)
     if any(not isfinite(q) or q < 0 for _, q in pairs):
         raise ValueError("mixture quantities must be finite and non-negative")
     # Drop pairs with zero quantity
-    # Note: must be first statement in order to accept iterators
     pairs = [(f, q) for f, q in pairs if q > 0]
 
     result = Formula()
@@ -184,10 +185,11 @@ def mix_by_volume(*args, **kw) -> "Formula":
 def _mix_by_volume_pairs(pairs: list[tuple["Formula", float]]) -> "Formula":
     from .formulas import Formula # For running as __main__
 
+    # Materialize iterators before validation so they can be reused below.
+    pairs = list(pairs)
     if any(not isfinite(q) or q < 0 for _, q in pairs):
         raise ValueError("mixture quantities must be finite and non-negative")
     # Drop pairs with zero quantity
-    # Note: must be first statement in order to accept iterators
     pairs = [(f, q) for f, q in pairs if q > 0]
 
     for f, _ in pairs:
